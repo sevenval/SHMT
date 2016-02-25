@@ -1,0 +1,7 @@
+To build and install the SHMT run:
+	phpize
+	./configure
+	make
+
+And finally installing it by:
+	make install
