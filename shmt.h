@@ -53,7 +53,7 @@
 	{
 		uint32_t	mark;			/* The plausibility check mark								*/
 		uint16_t	version;		/* The file compatibility check mark						*/
-		uint8_t		system;			/* The system compatibility check mark (x32/x64)			*/
+		uint8_t		system;			/* The system compatibility check mark (32/64 bit)			*/
 		uint32_t	mask;			/* The hash map mask										*/
 		size_t		mapSize;		/* The total hash map table size							*/
 		size_t		hashSize;		/* The size of the "hash" part in the hash map				*/

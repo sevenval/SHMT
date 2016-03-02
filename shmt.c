@@ -49,7 +49,7 @@ int shmtWriteItem(struct _shmtCreatorItem *src, struct _shmtItem *shmtItem, FILE
 	shmtItem->val_len = src->val_len;
 
 	if (src->key_len) {
-		/* Check the site_t overflow */
+		/* Check for site_t overflow */
 		if ((shmtItem->key_pos + shmtItem->key_len) < shmtItem->key_pos) {
 			return 0;
 		} else if (fwrite(src->key, 1, src->key_len, file) != (size_t)src->key_len) {
@@ -58,7 +58,7 @@ int shmtWriteItem(struct _shmtCreatorItem *src, struct _shmtItem *shmtItem, FILE
 	}
 
 	if (src->val_len) {
-		/* Check the site_t overflow */
+		/* Check for site_t overflow */
 		if ((shmtItem->key_pos + shmtItem->key_len + shmtItem->val_len) <= shmtItem->key_pos) {
 			return 0;
 		} else if (fwrite(src->val, 1, src->val_len, file) != (size_t)src->val_len) {

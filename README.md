@@ -25,9 +25,11 @@ SHMT:
 ## Limitations
 
 * Supported maximum number of data array elements is
-  2^26 (67.108.864 on x32 systems) and 2^31 (2.147.483.648
-  on x64 systems).
+  2^26 (67,108,864 on 32 bit systems) and 2^31 (2,147,483,648
+  on 64 bit systems).
 * The data array keys and values are always cast to string.
+* Data files cannot be exchanged between 32 bit and 64 bit 
+  systems or systems with different endianness.
 
 
 ## PHP Class
@@ -36,7 +38,7 @@ SHMT:
 public static boolean SHMT::create(string $filename, array $array)
 ```
 
-* Creates a SHMT from the `$array` and writes it into the `$filename`
+* Creates a SHMT from the `$array` and writes it into the file `$filename`
 * Returns `true` on success
 * Throws exceptions on errors
 

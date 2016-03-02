@@ -3,5 +3,5 @@ To build and install the SHMT run:
 	./configure
 	make
 
-And finally installing it by:
+And finally install it via:
 	make install
