@@ -2,12 +2,15 @@
 # SHMT (Static Hash Map Table)
 
 SHMT is an implementation of a very fast key-value read-only
-hash map table for PHP.
+hash map table for PHP7.
 
+We have developed SHMT as a faster, dependency-free replacement for the PECL
+[CHDB](https://pecl.php.net/package/chdb) extension.
 
 ## Features
 
-SHMT:
+SHMT
+
 * is written in C.
 * creates and uses its own memory-mapped binary file. This
   enable it to cache and share the loaded pages of the
@@ -16,8 +19,8 @@ SHMT:
   size of the binary file.
 * internally implements a "perfect hash function" and
   guarantees O(1) lookup time in the worst cases.
-* internally uses the very fast "MurmurHash3" hashing
-  algorithm.
+* internally uses the very fast "[MurmurHash3](https://en.wikipedia.org/wiki/MurmurHash)"
+  hashing algorithm.
 * doesn't require any external libraries.
 * is PHP 7 ready.
 
@@ -30,6 +33,8 @@ SHMT:
 * The data array keys and values are always cast to string.
 * Data files cannot be exchanged between 32 bit and 64 bit 
   systems or systems with different endianness.
+* The code compiles and runs on Linux systems. Other platforms
+  have not been tested.
 
 
 ## PHP Class
