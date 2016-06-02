@@ -1,9 +1,6 @@
-#include <stdio.h>
-#include <stdint.h>
-
-#include "php.h"
-#include "zend_exceptions.h"
-#include "ext/standard/info.h"
+#include <php.h>
+#include <Zend/zend_exceptions.h>
+#include <ext/standard/info.h>
 
 #include "php_shmt.h"
 #include "shmt.h"
