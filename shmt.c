@@ -13,6 +13,8 @@ struct _shmtHead shmtCreateHeader(uint32_t size)
 {
 	struct _shmtHead shmtHead;
 
+	memset(&shmtHead, 0, sizeof(struct _shmtHead));
+
 	shmtHead.mark		= SHMT_MARK;
 	shmtHead.version	= SHMT_FILE_VERSION;
 	shmtHead.system		= SIZEOF_SIZE_T;

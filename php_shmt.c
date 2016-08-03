@@ -178,6 +178,7 @@ PHP_METHOD(SHMT, create)
 		return shmtCleanup(&shmtHead, &pMap, &pFile, path, &pCItems, NULL, "SHMT: Unexpected internal \"malloc\" error");
 	}
 
+	memset(pCItems, 0, (shmtHead.mask + 1) * sizeof(struct _shmtCreatorItem));
 	memset(pLItems, 0, (shmtHead.mask + 1) * sizeof(struct _shmtCreatorList));
 
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
