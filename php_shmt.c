@@ -79,7 +79,6 @@ PHP_METHOD(SHMT, get)
 	char				*key;
 	size_t				keyLen;
 	uint32_t			hash;
-	zval				result;
 	struct _shmtItem	*shmtItem;
 	struct _shmtHash	*shmtHash;
 
@@ -105,16 +104,14 @@ PHP_METHOD(SHMT, get)
 
 	if ((shmtItem->key_pos != SIZE_MAX) && (keyLen == shmtItem->key_len)) {
 		if ((memcmp((const void *)((char *)object->shmt + shmtItem->key_pos), key, keyLen) == 0)) {
-			ZVAL_STRINGL(&result, (char *)object->shmt + shmtItem->key_pos + shmtItem->key_len, shmtItem->val_len);
-			RETURN_ZVAL(&result, 0, 1);
+			RETURN_STRINGL((char *)object->shmt + shmtItem->key_pos + shmtItem->key_len, shmtItem->val_len);
 		}
 	}
 
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 	/* No match found -> return a NULL value */
-	ZVAL_NULL(&result);
-	RETURN_ZVAL(&result, 0, 1);
+	RETURN_NULL();
 }
 
 PHP_METHOD(SHMT, create)
@@ -315,7 +312,7 @@ PHP_METHOD(SHMT, create)
 
 	shmtCleanup(&pMap, &pFile, NULL, &pCItems, &pLItems, NULL);
 
-	RETURN_BOOL(1);
+	RETURN_TRUE;
 }
 
 /* ==================================================================================================== */
