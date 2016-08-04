@@ -13,6 +13,8 @@ struct _shmtHead shmtCreateHeader(uint32_t size)
 {
 	struct _shmtHead shmtHead;
 
+	memset(&shmtHead, 0, sizeof(struct _shmtHead));
+
 	shmtHead.mark		= SHMT_MARK;
 	shmtHead.version	= SHMT_FILE_VERSION;
 	shmtHead.system		= SIZEOF_SIZE_T;
@@ -113,8 +115,12 @@ int shmtCleanupReader(int file, const char *message)
 	return 1;
 }
 
-void shmtCleanup(struct _shmtHash **map, FILE **file, const char *path, struct _shmtCreatorItem **it, struct _shmtCreatorList **li, const char *message)
+void shmtCleanup(struct _shmtHead *head, struct _shmtHash **map, FILE **file, const char *path, struct _shmtCreatorItem **it, struct _shmtCreatorList **li, const char *message)
 {
+	struct _shmtCreatorList	*pLItem;
+	struct _shmtCreatorItem	*pCItem;
+	size_t					idx, iterator;
+
 	if (map != NULL) {
 		efree(*map);
 	}
@@ -128,6 +134,34 @@ void shmtCleanup(struct _shmtHash **map, FILE **file, const char *path, struct _
 	}
 
 	if (it != NULL) {
+		if ((li != NULL) && (head != NULL)) {
+			for (iterator = 0; iterator <= head->mask; iterator++) {
+				pLItem = ((struct _shmtCreatorList *)(*li)) + iterator;
+
+				if (pLItem->num <= 0) {
+					break; /* No more items available, nothing to free any more */
+				}
+
+				idx = pLItem->idx;
+
+				if (pLItem->num > 1) {
+					while (idx != UINT32_MAX) {
+						pCItem = ((struct _shmtCreatorItem *)(*it)) + idx;
+
+						efree(pCItem->key);
+						efree(pCItem->val);
+
+						idx = pCItem->next;
+					}
+				} else {
+					pCItem = ((struct _shmtCreatorItem *)(*it)) + idx;
+
+					efree(pCItem->key);
+					efree(pCItem->val);
+				}
+			}
+		}
+
 		efree(*it);
 	}
 
