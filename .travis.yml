@@ -8,5 +8,5 @@ script:
     - phpize
     - ./configure
     - make
-    - php -n run-tests.php -n -d extension_dir=./modules/ -d extension=shmt.so
+    - TEST_PHP_EXECUTABLE=`which php` php -n run-tests.php -n -d extension_dir=./modules/ -d extension=shmt.so -q -x --show-diff
 
