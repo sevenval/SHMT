@@ -7,6 +7,7 @@ $array = ['foo' => 'bar', 'bar' => 'baz', 666 => 'evil', 'evil' => 666];
 var_dump(SHMT::create($file, $array));
 var_dump(file_exists($file));
 var_dump(filesize($file) > 50);
+unlink($file);
 --EXPECT--
 bool(true)
 bool(true)
