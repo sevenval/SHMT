@@ -1,0 +1,12 @@
+language: php
+
+php:
+    - 7.0
+    - nightly
+
+script:
+    - phpize
+    - ./configure
+    - make
+    - php -n run-tests.php -n -d extension_dir=./modules/ -d extension=shmt.so
+
