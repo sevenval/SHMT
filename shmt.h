@@ -91,9 +91,9 @@
 
 	static inline int shmtSortCmp(const void *a, const void *b)
 	{
-		if ( (*(struct _shmtCreatorList *)a).num >  (*(struct _shmtCreatorList *)b).num ) {
+		if ((*(struct _shmtCreatorList *)a).num > (*(struct _shmtCreatorList *)b).num) {
 			return -1;
-		} else if ( (*(struct _shmtCreatorList *)a).num <  (*(struct _shmtCreatorList *)b).num ) {
+		} else if ((*(struct _shmtCreatorList *)a).num < (*(struct _shmtCreatorList *)b).num) {
 			return  1;
 		} else {
 			return  0;
