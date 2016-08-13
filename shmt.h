@@ -81,9 +81,9 @@
 
 	int shmtCleanupReader(int file, const char *message);
 
-	void shmtCleanup(struct _shmtHead *head, struct _shmtHash **map, FILE **file, const char *path, struct _shmtCreatorItem **it, struct _shmtCreatorList **li, const char *message);
+	void shmtCleanup(struct _shmtHead *head, struct _shmtHash *map, FILE *file, const char *path, struct _shmtCreatorItem *it, struct _shmtCreatorList *li, const char *message);
 
-	void shmtFree(struct _shmtHead **shmt);
+	void shmtFree(struct _shmtHead *shmt);
 
 	uint32_t _shmtGetMapSize(uint32_t size);
 

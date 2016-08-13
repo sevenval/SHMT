@@ -12,7 +12,7 @@ zend_object_handlers SHMT_handlers;
 
 inline SHMT_object *SHMT_fetch(zend_object *object)
 {
-	return (SHMT_object *)((char *)(object) - XtOffsetOf(SHMT_object, std));
+	return (SHMT_object *)((void *)(object) - XtOffsetOf(SHMT_object, std));
 }
 
 zend_object *SHMT_new(zend_class_entry *ce)
@@ -36,7 +36,7 @@ void SHMT_free(zend_object *object)
 
 	zend_object_std_dtor(&intern->std);
 
-	shmtFree(&intern->shmt);
+	shmtFree(intern->shmt);
 }
 
 /* ==================================================================================================== */
@@ -69,8 +69,8 @@ PHP_METHOD(SHMT, __construct)
 	}
 
 	/* Assign the pointer to the right addresses/offsets */
-	object->map = (struct _shmtHash *)((char *)object->shmt + sizeof(struct _shmtHead));
-	object->tbl = (struct _shmtItem *)((char *)object->map + object->shmt->hashSize);
+	object->map = (struct _shmtHash *)((void *)object->shmt + sizeof(struct _shmtHead));
+	object->tbl = (struct _shmtItem *)((void *)object->map + object->shmt->hashSize);
 }
 
 PHP_METHOD(SHMT, get)
@@ -103,8 +103,8 @@ PHP_METHOD(SHMT, get)
 	}
 
 	if ((shmtItem->key_pos != SIZE_MAX) && (keyLen == shmtItem->key_len)) {
-		if ((memcmp((const void *)((char *)object->shmt + shmtItem->key_pos), key, keyLen) == 0)) {
-			RETURN_STRINGL((char *)object->shmt + shmtItem->key_pos + shmtItem->key_len, shmtItem->val_len);
+		if ((memcmp((const void *)((void *)object->shmt + shmtItem->key_pos), key, keyLen) == 0)) {
+			RETURN_STRINGL((void *)object->shmt + shmtItem->key_pos + shmtItem->key_len, shmtItem->val_len);
 		}
 	}
 
@@ -149,19 +149,19 @@ PHP_METHOD(SHMT, create)
 	shmtHead = shmtCreateHeader(iCount);
 
 	if (shmtHead.mask == UINT32_MAX) {
-		return shmtCleanup(&shmtHead, NULL, &pFile, path, NULL, NULL, "SHMT: Number of the given elements is out of range");
+		return shmtCleanup(&shmtHead, NULL, pFile, path, NULL, NULL, "SHMT: Number of the given elements is out of range");
 	}
 
 	if ((fwrite(&shmtHead, 1, sizeof(shmtHead), pFile)) < sizeof(shmtHead)) {
-		return shmtCleanup(&shmtHead, NULL, &pFile, path, NULL, NULL, "SHMT: Cannot write the header");
+		return shmtCleanup(&shmtHead, NULL, pFile, path, NULL, NULL, "SHMT: Cannot write the header");
 	}
 
 	if (!shmtCreateMapTable(&pMap, &pTbl, shmtHead)) {
-		return shmtCleanup(&shmtHead, NULL, &pFile, path, NULL, NULL, "SHMT: Cannot create the table");
+		return shmtCleanup(&shmtHead, NULL, pFile, path, NULL, NULL, "SHMT: Cannot create the table");
 	}
 
 	if (fseek(pFile, shmtHead.mapSize, SEEK_CUR)) {
-		return shmtCleanup(&shmtHead, &pMap, &pFile, path, NULL, NULL, "SHMT: Unexpected internal \"seek\" error");
+		return shmtCleanup(&shmtHead, pMap, pFile, path, NULL, NULL, "SHMT: Unexpected internal \"seek\" error");
 	}
 
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -171,11 +171,11 @@ PHP_METHOD(SHMT, create)
 	struct _shmtCreatorList	*pLItem = NULL, *pLItems = NULL;
 
 	if ((pCItems = (struct _shmtCreatorItem *)emalloc((shmtHead.mask + 1) * sizeof(struct _shmtCreatorItem))) == NULL) {
-		return shmtCleanup(&shmtHead, &pMap, &pFile, path, NULL, NULL, "SHMT: Unexpected internal \"malloc\" error");
+		return shmtCleanup(&shmtHead, pMap, pFile, path, NULL, NULL, "SHMT: Unexpected internal \"malloc\" error");
 	}
 
 	if ((pLItems = (struct _shmtCreatorList *)emalloc((shmtHead.mask + 1) * sizeof(struct _shmtCreatorList))) == NULL) {
-		return shmtCleanup(&shmtHead, &pMap, &pFile, path, &pCItems, NULL, "SHMT: Unexpected internal \"malloc\" error");
+		return shmtCleanup(&shmtHead, pMap, pFile, path, pCItems, NULL, "SHMT: Unexpected internal \"malloc\" error");
 	}
 
 	memset(pCItems, 0, (shmtHead.mask + 1) * sizeof(struct _shmtCreatorItem));
@@ -277,7 +277,7 @@ PHP_METHOD(SHMT, create)
 				shmtItem = ((struct _shmtItem *)(pTbl)) + aTempMod[n];
 
 				if (!shmtWriteItem(pCItem, shmtItem, pFile)) {
-					return shmtCleanup(&shmtHead, &pMap, &pFile, path, &pCItems, &pLItems, "SHMT: Unexpected internal \"write\" error");
+					return shmtCleanup(&shmtHead, pMap, pFile, path, pCItems, pLItems, "SHMT: Unexpected internal \"write\" error");
 				}
 
 				iItemIndex = pCItem->next;
@@ -287,7 +287,7 @@ PHP_METHOD(SHMT, create)
 			pCItem = ((struct _shmtCreatorItem *)(pCItems)) + iItemIndex;
 
 			if (!shmtWriteItem(pCItem, &pMap[pCItem->hash].hit, pFile)) {
-				return shmtCleanup(&shmtHead, &pMap, &pFile, path, &pCItems, &pLItems, "SHMT: Unexpected internal \"write\" error");
+				return shmtCleanup(&shmtHead, pMap, pFile, path, pCItems, pLItems, "SHMT: Unexpected internal \"write\" error");
 			}
 		}
 	}
@@ -295,21 +295,21 @@ PHP_METHOD(SHMT, create)
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 	if (fseek(pFile, sizeof(shmtHead), SEEK_SET) || ((fwrite(pMap, 1, shmtHead.mapSize, pFile)) < shmtHead.mapSize)) {
-		return shmtCleanup(&shmtHead, &pMap, &pFile, path, &pCItems, &pLItems, "SHMT: Cannot write the table");
+		return shmtCleanup(&shmtHead, pMap, pFile, path, pCItems, pLItems, "SHMT: Cannot write the table");
 	}
 
 	if (
 		(fseek(pFile, 0, SEEK_END) != 0) ||
 		((shmtHead.fileSize = ftell(pFile)) <= 0) ||
-		(fseek(pFile, (char *)&shmtHead.fileSize - (char *)&shmtHead, SEEK_SET) != 0) ||
+		(fseek(pFile, (void *)&shmtHead.fileSize - (void *)&shmtHead, SEEK_SET) != 0) ||
 		((fwrite(&shmtHead.fileSize, 1, sizeof(shmtHead.fileSize), pFile)) < sizeof(shmtHead.fileSize))
 	) {
-		return shmtCleanup(&shmtHead, &pMap, &pFile, path, &pCItems, &pLItems, "SHMT: Unexpected internal \"finalize\" error");
+		return shmtCleanup(&shmtHead, pMap, pFile, path, pCItems, pLItems, "SHMT: Unexpected internal \"finalize\" error");
 	}
 
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-	shmtCleanup(&shmtHead, &pMap, &pFile, NULL, &pCItems, &pLItems, NULL);
+	shmtCleanup(&shmtHead, pMap, pFile, NULL, pCItems, pLItems, NULL);
 
 	RETURN_TRUE;
 }
