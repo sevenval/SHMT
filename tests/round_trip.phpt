@@ -2,6 +2,7 @@
 SHMT: Test round trip
 --INI--
 max_execution_time=90
+memory_limit = 512M
 --FILE--
 <?php
 function _getRandomValue()
