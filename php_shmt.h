@@ -2,7 +2,7 @@
 	#define PHP_SHMT_H
 
 	#define PHP_SHMT_EXTNAME	"SHMT"
-	#define PHP_SHMT_EXTVER		"1.0.1"
+	#define PHP_SHMT_EXTVER		"1.0.2dev"
 
 	#ifdef HAVE_CONFIG_H
 		#include "config.h"
