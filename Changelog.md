@@ -1,5 +1,5 @@
 
-1.0.1dev
+1.0.1
 
  * Fixed: Memory leaks in the `SHMT::create()` method (`7ea1490`)
  * Fixed: The order of the `include`s (`cc9afee`)
