@@ -170,16 +170,13 @@ PHP_METHOD(SHMT, create)
 	struct _shmtCreatorItem	*pCItem = NULL, *pCItems = NULL;
 	struct _shmtCreatorList	*pLItem = NULL, *pLItems = NULL;
 
-	if ((pCItems = (struct _shmtCreatorItem *)emalloc((shmtHead.mask + 1) * sizeof(struct _shmtCreatorItem))) == NULL) {
+	if ((pCItems = (struct _shmtCreatorItem *)ecalloc(1, (shmtHead.mask + 1) * sizeof(struct _shmtCreatorItem))) == NULL) {
 		return shmtCleanup(&shmtHead, pMap, pFile, path, NULL, NULL, "SHMT: Unexpected internal \"malloc\" error");
 	}
 
-	if ((pLItems = (struct _shmtCreatorList *)emalloc((shmtHead.mask + 1) * sizeof(struct _shmtCreatorList))) == NULL) {
+	if ((pLItems = (struct _shmtCreatorList *)ecalloc(1, (shmtHead.mask + 1) * sizeof(struct _shmtCreatorList))) == NULL) {
 		return shmtCleanup(&shmtHead, pMap, pFile, path, pCItems, NULL, "SHMT: Unexpected internal \"malloc\" error");
 	}
-
-	memset(pCItems, 0, (shmtHead.mask + 1) * sizeof(struct _shmtCreatorItem));
-	memset(pLItems, 0, (shmtHead.mask + 1) * sizeof(struct _shmtCreatorList));
 
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
