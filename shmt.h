@@ -60,13 +60,13 @@
 		size_t		fileSize;		/* The file size in bytes (for "mmap()")					*/
 	};
 
-	typedef struct _SHMT_object
+	typedef struct _shmt_object
 	{
 		struct _shmtHead	*shmt;	/* The "mmap()" pointer to be able to call "munmap()"		*/
 		struct _shmtHash	*map;	/* The pointer to the "map" part in the total map table		*/
 		struct _shmtItem	*tbl;	/* The pointer to the "tbl" part in the total map table		*/
 		zend_object			std;	/* The PHP class object										*/
-	} SHMT_object;
+	} shmt_object;
 
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 	/* FUNCTIONS */

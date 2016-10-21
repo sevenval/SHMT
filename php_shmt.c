@@ -7,17 +7,17 @@
 
 /* ==================================================================================================== */
 
-zend_class_entry *ceSHMT;
-zend_object_handlers SHMT_handlers;
+zend_class_entry *ce_shmt;
+zend_object_handlers shmt_handlers;
 
-inline SHMT_object *SHMT_fetch(zend_object *object)
+inline shmt_object *shmt_fetch(zend_object *object)
 {
-	return (SHMT_object *)((void *)(object) - XtOffsetOf(SHMT_object, std));
+	return (shmt_object *)((void *)(object) - XtOffsetOf(shmt_object, std));
 }
 
-zend_object *SHMT_new(zend_class_entry *ce)
+zend_object *shmt_new(zend_class_entry *ce)
 {
-	SHMT_object *intern = (SHMT_object *)ecalloc(1, sizeof(SHMT_object) + zend_object_properties_size(ce));
+	shmt_object *intern = (shmt_object *)ecalloc(1, sizeof(shmt_object) + zend_object_properties_size(ce));
 
 	intern->shmt	= NULL;
 	intern->map		= NULL;
@@ -25,14 +25,14 @@ zend_object *SHMT_new(zend_class_entry *ce)
 
 	zend_object_std_init(&intern->std, ce);
 	object_properties_init(&intern->std, ce);
-	intern->std.handlers = &SHMT_handlers;
+	intern->std.handlers = &shmt_handlers;
 
 	return &intern->std;
 }
 
-void SHMT_free(zend_object *object)
+void shmt_free(zend_object *object)
 {
-	SHMT_object *intern = SHMT_fetch(object);
+	shmt_object *intern = shmt_fetch(object);
 
 	zend_object_std_dtor(&intern->std);
 
@@ -58,7 +58,7 @@ ZEND_END_ARG_INFO()
 
 PHP_METHOD(SHMT, __construct)
 {
-	SHMT_object	*object = SHMT_fetch(Z_OBJ_P(getThis()));
+	shmt_object	*object = shmt_fetch(Z_OBJ_P(getThis()));
 	char		*path;
 	size_t		pathLen;
 
@@ -75,7 +75,7 @@ PHP_METHOD(SHMT, __construct)
 
 PHP_METHOD(SHMT, get)
 {
-	SHMT_object			*object;
+	shmt_object			*object;
 	char				*key;
 	size_t				keyLen;
 	uint32_t			hash;
@@ -86,7 +86,7 @@ PHP_METHOD(SHMT, get)
 		return;
 	}
 
-	object = SHMT_fetch(Z_OBJ_P(getThis()));
+	object = shmt_fetch(Z_OBJ_P(getThis()));
 
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
@@ -170,13 +170,16 @@ PHP_METHOD(SHMT, create)
 	struct _shmtCreatorItem	*pCItem = NULL, *pCItems = NULL;
 	struct _shmtCreatorList	*pLItem = NULL, *pLItems = NULL;
 
-	if ((pCItems = (struct _shmtCreatorItem *)ecalloc(1, (shmtHead.mask + 1) * sizeof(struct _shmtCreatorItem))) == NULL) {
+	if ((pCItems = (struct _shmtCreatorItem *)emalloc((shmtHead.mask + 1) * sizeof(struct _shmtCreatorItem))) == NULL) {
 		return shmtCleanup(&shmtHead, pMap, pFile, path, NULL, NULL, "SHMT: Unexpected internal \"malloc\" error");
 	}
 
-	if ((pLItems = (struct _shmtCreatorList *)ecalloc(1, (shmtHead.mask + 1) * sizeof(struct _shmtCreatorList))) == NULL) {
+	if ((pLItems = (struct _shmtCreatorList *)emalloc((shmtHead.mask + 1) * sizeof(struct _shmtCreatorList))) == NULL) {
 		return shmtCleanup(&shmtHead, pMap, pFile, path, pCItems, NULL, "SHMT: Unexpected internal \"malloc\" error");
 	}
+
+	memset(pCItems, 0, (shmtHead.mask + 1) * sizeof(struct _shmtCreatorItem));
+	memset(pLItems, 0, (shmtHead.mask + 1) * sizeof(struct _shmtCreatorList));
 
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
@@ -313,7 +316,7 @@ PHP_METHOD(SHMT, create)
 
 /* ==================================================================================================== */
 
-zend_function_entry SHMT_methods[] = {
+zend_function_entry shmt_methods[] = {
 	PHP_ME(SHMT, __construct, arginfo_SHMT__construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(SHMT, get, arginfo_SHMT_get, ZEND_ACC_PUBLIC)
 	PHP_ME(SHMT, create, arginfo_SHMT_create, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
@@ -328,14 +331,14 @@ static PHP_MINIT_FUNCTION(shmt)
 
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
 
-	memcpy(&SHMT_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	SHMT_handlers.offset = XtOffsetOf(SHMT_object, std);
-	SHMT_handlers.dtor_obj = zend_objects_destroy_object;
-	SHMT_handlers.free_obj = SHMT_free;
+	memcpy(&shmt_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	shmt_handlers.offset = XtOffsetOf(shmt_object, std);
+	shmt_handlers.dtor_obj = zend_objects_destroy_object;
+	shmt_handlers.free_obj = shmt_free;
 
-	INIT_CLASS_ENTRY(ce, "SHMT", SHMT_methods);
-	ce.create_object = SHMT_new;
-	ceSHMT = zend_register_internal_class_ex(&ce, NULL);
+	INIT_CLASS_ENTRY(ce, "SHMT", shmt_methods);
+	ce.create_object = shmt_new;
+	ce_shmt = zend_register_internal_class_ex(&ce, NULL);
 
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
 
