@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/sevenval/SHMT.svg?branch=master)](https://travis-ci.org/sevenval/SHMT)
+[![Software license][ico-license]](LICENSE)
+[![Build status][ico-travis]][link-travis]
 
 # SHMT (Static Hash Map Table)
 
@@ -90,3 +91,7 @@ echo $shmt->get('123456789');  // string(5) "12345"
 echo $shmt->get(-1);           // string(0) ""
 echo $shmt->get('abc_xyz');    // NULL
 ```
+
+[ico-license]: https://img.shields.io/github/license/mashape/apistatus.svg
+[ico-travis]: https://travis-ci.org/sevenval/SHMT.svg?branch=master
+[link-travis]: https://travis-ci.org/sevenval/SHMT
