@@ -1,4 +1,3 @@
-[![Software license][ico-license]](LICENSE)
 [![Build Status](https://travis-ci.org/sevenval/SHMT.svg?branch=master)](https://travis-ci.org/sevenval/SHMT)
 
 # SHMT (Static Hash Map Table)
