@@ -10,12 +10,12 @@
 zend_class_entry *ce_shmt;
 zend_object_handlers shmt_handlers;
 
-inline shmt_object *shmt_fetch(zend_object *object)
+static inline shmt_object *shmt_fetch(zend_object *object)
 {
 	return (shmt_object *)((void *)(object) - XtOffsetOf(shmt_object, std));
 }
 
-zend_object *shmt_new(zend_class_entry *ce)
+static zend_object *shmt_new(zend_class_entry *ce)
 {
 	shmt_object *intern = (shmt_object *)ecalloc(1, sizeof(shmt_object) + zend_object_properties_size(ce));
 
@@ -30,7 +30,7 @@ zend_object *shmt_new(zend_class_entry *ce)
 	return &intern->std;
 }
 
-void shmt_free(zend_object *object)
+static void shmt_free(zend_object *object)
 {
 	shmt_object *intern = shmt_fetch(object);
 
