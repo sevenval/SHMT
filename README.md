@@ -24,7 +24,7 @@ SHMT
 * internally uses the very fast "[MurmurHash3](https://en.wikipedia.org/wiki/MurmurHash)"
   hashing algorithm.
 * doesn't require any external libraries.
-* is PHP 7 and PHP 7.1 ready.
+* is PHP 7.x ready.
 
 
 ## Limitations
