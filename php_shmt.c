@@ -49,6 +49,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_SHMT_get, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_SHMT_keys, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_SHMT_create, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
@@ -112,6 +115,37 @@ PHP_METHOD(SHMT, get)
 
 	/* No match found -> return a NULL value */
 	RETURN_NULL();
+}
+
+PHP_METHOD(SHMT, keys) {
+	shmt_object         *object;
+	struct _shmtHash    *shmtHash;
+	struct _shmtItem    *shmtItem;
+	
+	object = shmt_fetch(Z_OBJ_P(getThis()));
+
+	uint32_t index;
+
+	array_init(return_value);
+
+	/* All the keys with unique hashes */
+	for (index = 0; index <= object->shmt->mask; index++){
+		shmtHash = &object->map[index];
+		if (shmtHash->seed == UINT32_MAX) {
+			shmtItem = &shmtHash->hit;
+			if (shmtItem->key_pos != SIZE_MAX) {
+				add_next_index_stringl(return_value, ((void *)object->shmt + shmtItem->key_pos), shmtItem->key_len);
+			}
+		}
+	}
+
+	/* All the keys with collisions */
+	for (index = 0; index <= object->shmt->mask; index++){
+		shmtItem = &object->tbl[index];
+		if (shmtItem->key_pos != SIZE_MAX) {
+			add_next_index_stringl(return_value, ((void *)object->shmt + shmtItem->key_pos), shmtItem->key_len);
+		}
+	}
 }
 
 PHP_METHOD(SHMT, create)
@@ -319,6 +353,7 @@ PHP_METHOD(SHMT, create)
 zend_function_entry shmt_methods[] = {
 	PHP_ME(SHMT, __construct, arginfo_SHMT__construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(SHMT, get, arginfo_SHMT_get, ZEND_ACC_PUBLIC)
+	PHP_ME(SHMT, keys, arginfo_SHMT_keys, ZEND_ACC_PUBLIC)
 	PHP_ME(SHMT, create, arginfo_SHMT_create, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_FE_END
 };

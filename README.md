@@ -66,6 +66,13 @@ public (string|null) SHMT::get(string $string)
 * Returns the value if the key `$string` exists, otherwise `null`
 
 
+```
+public array SHMT::keys()
+```
+
+* Returns the list of all keys stored in the SHMT.
+
+
 ### Example
 
 Create a SHMT:
