@@ -9,39 +9,39 @@
 
 /* ==================================================================================================== */
 
-struct _shmtHead shmtCreateHeader(uint32_t size)
+shmtHead shmtCreateHeader(uint32_t size)
 {
-	struct _shmtHead shmtHead;
+	shmtHead sHead;
 
-	memset(&shmtHead, 0, sizeof(struct _shmtHead));
+	memset(&sHead, 0, sizeof(sHead));
 
-	shmtHead.mark		= SHMT_MARK;
-	shmtHead.version	= SHMT_FILE_VERSION;
-	shmtHead.system		= SIZEOF_SIZE_T;
-	shmtHead.mask		= _shmtGetMapSize(size) - 1;
-	shmtHead.fileSize	= 0;
-	shmtHead.hashSize	= (shmtHead.mask + 1) * sizeof(struct _shmtHash);
-	shmtHead.mapSize	= shmtHead.hashSize + ((shmtHead.mask + 1) * sizeof(struct _shmtItem));
+	sHead.mark		= SHMT_MARK;
+	sHead.version	= SHMT_FILE_VERSION;
+	sHead.system	= SIZEOF_SIZE_T;
+	sHead.mask		= _shmtGetMapSize(size) - 1;
+	sHead.fileSize	= 0;
+	sHead.hashSize	= (sHead.mask + 1) * sizeof(shmtHash);
+	sHead.mapSize	= sHead.hashSize + ((sHead.mask + 1) * sizeof(shmtItem));
 
-	return shmtHead;
+	return sHead;
 }
 
-int shmtCreateMapTable(struct _shmtHash **pMap, struct _shmtItem **pTbl, struct _shmtHead shmtHead)
+int shmtCreateMapTable(shmtHash **pMap, shmtItem **pTbl, shmtHead sHead)
 {
-	if ((*pMap = (struct _shmtHash *)emalloc(shmtHead.mapSize)) == NULL) {
+	if ((*pMap = (shmtHash *)emalloc(sHead.mapSize)) == NULL) {
 		return 0;
 	}
 
 	/* Fill the pMap and pTbl with the empty-index flags */
-	memset(((void *)(*pMap)), UINT32_MAX, shmtHead.mapSize);
+	memset(((void *)(*pMap)), UINT32_MAX, sHead.mapSize);
 
 	/* Assign the forwarded address */
-	*pTbl = (struct _shmtItem *)((void *)*pMap + shmtHead.hashSize);
+	*pTbl = (shmtItem *)((void *)*pMap + sHead.hashSize);
 
 	return 1;
 }
 
-int shmtWriteItem(struct _shmtCreatorItem *src, struct _shmtItem *shmtItem, FILE *file)
+int shmtWriteItem(shmtCreatorItem *src, shmtItem *shmtItem, FILE *file)
 {
 	if ((shmtItem->key_pos = ftell(file)) <= 0) {
 		return 0;
@@ -71,7 +71,7 @@ int shmtWriteItem(struct _shmtCreatorItem *src, struct _shmtItem *shmtItem, FILE
 	return 1;
 }
 
-int shmtReadTable(const char *path, struct _shmtHead **shmt)
+int shmtReadTable(const char *path, shmtHead **shmt)
 {
 	struct stat	sizeCheck;
 	int			file;
@@ -84,9 +84,9 @@ int shmtReadTable(const char *path, struct _shmtHead **shmt)
 		return shmtCleanupReader(file, "SHMT: Cannot read the file size");
 	} else if ((size_t)sizeCheck.st_size > SIZE_MAX) {
 		return shmtCleanupReader(file, "SHMT: Given file is out of the supported file size range");
-	} else if ((size_t)sizeCheck.st_size < sizeof(struct _shmtHead)) {
+	} else if ((size_t)sizeCheck.st_size < sizeof(shmtHead)) {
 		return shmtCleanupReader(file, "SHMT: Cannot read the header");
-	} else if ((*shmt = (struct _shmtHead *)mmap(NULL, (size_t)sizeCheck.st_size, PROT_READ, MAP_SHARED, file, 0)) == MAP_FAILED) {
+	} else if ((*shmt = (shmtHead *)mmap(NULL, (size_t)sizeCheck.st_size, PROT_READ, MAP_SHARED, file, 0)) == MAP_FAILED) {
 		return shmtCleanupReader(file, "SHMT: Cannot map the file to the memory");
 	} else if ((size_t)sizeCheck.st_size != (*shmt)->fileSize) {
 		return shmtCleanupReader(file, "SHMT: Corrupt SHMT file detected");
@@ -115,11 +115,11 @@ int shmtCleanupReader(int file, const char *message)
 	return 1;
 }
 
-void shmtCleanup(struct _shmtHead *head, struct _shmtHash *map, FILE *file, const char *path, struct _shmtCreatorItem *it, struct _shmtCreatorList *li, const char *message)
+void shmtCleanup(shmtHead *sHead, shmtHash *map, FILE *file, const char *path, shmtCreatorItem *it, shmtCreatorList *li, const char *message)
 {
-	struct _shmtCreatorList	*pLItem;
-	struct _shmtCreatorItem	*pCItem;
-	size_t					idx, iterator;
+	shmtCreatorList	*pLItem;
+	shmtCreatorItem	*pCItem;
+	size_t			idx, iterator;
 
 	if (map != NULL) {
 		efree(map);
@@ -134,9 +134,9 @@ void shmtCleanup(struct _shmtHead *head, struct _shmtHash *map, FILE *file, cons
 	}
 
 	if (it != NULL) {
-		if ((li != NULL) && (head != NULL)) {
-			for (iterator = 0; iterator <= head->mask; iterator++) {
-				pLItem = ((struct _shmtCreatorList *)li) + iterator;
+		if ((li != NULL) && (sHead != NULL)) {
+			for (iterator = 0; iterator <= sHead->mask; iterator++) {
+				pLItem = ((shmtCreatorList *)li) + iterator;
 
 				if (pLItem->num <= 0) {
 					break; /* No more items available, nothing to free any more */
@@ -146,7 +146,7 @@ void shmtCleanup(struct _shmtHead *head, struct _shmtHash *map, FILE *file, cons
 
 				if (pLItem->num > 1) {
 					while (idx != UINT32_MAX) {
-						pCItem = ((struct _shmtCreatorItem *)it) + idx;
+						pCItem = ((shmtCreatorItem *)it) + idx;
 
 						efree(pCItem->key);
 						efree(pCItem->val);
@@ -154,7 +154,7 @@ void shmtCleanup(struct _shmtHead *head, struct _shmtHash *map, FILE *file, cons
 						idx = pCItem->next;
 					}
 				} else {
-					pCItem = ((struct _shmtCreatorItem *)it) + idx;
+					pCItem = ((shmtCreatorItem *)it) + idx;
 
 					efree(pCItem->key);
 					efree(pCItem->val);
@@ -174,7 +174,7 @@ void shmtCleanup(struct _shmtHead *head, struct _shmtHash *map, FILE *file, cons
 	}
 }
 
-void shmtFree(struct _shmtHead *shmt)
+void shmtFree(shmtHead *shmt)
 {
 	if (shmt && (shmt != MAP_FAILED)) {
 		munmap(shmt, shmt->fileSize);
