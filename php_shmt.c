@@ -12,7 +12,7 @@ zend_object_handlers shmt_handlers;
 
 static inline shmt_object *shmt_fetch(zend_object *object)
 {
-	return (shmt_object *)((void *)(object) - XtOffsetOf(shmt_object, std));
+	return (shmt_object *)((void *)(object) - offsetof(shmt_object, std));
 }
 
 static zend_object *shmt_new(zend_class_entry *ce)
@@ -244,7 +244,7 @@ PHP_METHOD(SHMT, create)
 		pLItem->idx		= iItemIndex;
 		pLItem->num++;
 
-		zval_dtor(&currKey);
+		zval_ptr_dtor_nogc(&currKey);
 		zend_hash_move_forward_ex(htData, &hpPos);
 	}
 
@@ -367,7 +367,7 @@ static PHP_MINIT_FUNCTION(shmt)
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
 
 	memcpy(&shmt_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	shmt_handlers.offset = XtOffsetOf(shmt_object, std);
+	shmt_handlers.offset = offsetof(shmt_object, std);
 	shmt_handlers.dtor_obj = zend_objects_destroy_object;
 	shmt_handlers.free_obj = shmt_free;
 
