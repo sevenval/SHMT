@@ -1,4 +1,8 @@
 
+1.0.2dev
+
+ * Improved: Using `typedef struct` for better code readability (`3a80748`)
+
 1.0.1
 
  * Fixed: Memory leaks in the `SHMT::create()` method (`7ea1490`)
